@@ -1,0 +1,67 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:util="http://www.springframework.org/schema/util" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	   xmlns:repository="http://www.springframework.org/schema/data/repository"
+	   xmlns:p="http://www.springframework.org/schema/p" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+       http://www.springframework.org/schema/rabbit	http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd 
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+       http://www.springframework.org/schema/data/repository http://www.springframework.org/schema/data/repository/spring-repository.xsd
+       http://www.springframework.org/schema/rabbit
+       http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="file:application.properties"/>
+    </bean> 
+
+	<context:annotation-config />
+	
+	<context:component-scan base-package="com.helpchat.tests" />
+	
+	<jpa:repositories base-package="com.helpchat.tests.dao"
+
+		entity-manager-factory-ref="helpchatEntityManagerFactory"
+		transaction-manager-ref="helpchatTransactionManager" />
+
+
+    <!-- User Analysis JPA transaction managerFactory -->
+	<bean id="helpchatEntityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="helpchat" />
+		<property name="packagesToScan" value="com.helpchat.tests.entities" />
+		<property name="dataSource" ref="helpchatDataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="database" value="MYSQL" />
+				<property name="showSql" value="false" />
+			</bean>
+		</property>
+
+	</bean>
+	
+	<!-- User Analysis JPA transaction manager -->
+	<bean id="helpchatTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+			<property name="entityManagerFactory" ref="helpchatEntityManagerFactory" />
+		</bean>
+	
+    <!-- User Analysis Data Source -->
+	<bean id="helpchatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+       	<property name="url" value="jdbc:mysql://127.0.0.1/helpchat" />
+        <property name="username" value="root" />
+        <property name="password" value="root" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="helpchatTransactionManager" order="10" />
+	
+
+</beans>		
