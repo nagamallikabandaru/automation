@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.helpchat.tests.dao.CityRepositoryTest;
 import com.helpchat.tests.entities.CityMaster;
+import com.helpchat.tests.masterdata.repository.CityRepositoryTest;
 
 
 @Service
@@ -30,9 +31,11 @@ public class StateCityServiceTest {
 //
 //    }
 	@Autowired
-	private CityRepositoryTest cityRepositoryTest;
+//	CityRepositoryTest cityRepositoryTest;
+	ApplicationContext context;
 	
 	public CityMaster findCityByName(String cityName) throws Exception {
+		CityRepositoryTest cityRepositoryTest= context.getBean(CityRepositoryTest.class);
 		return cityRepositoryTest.findByCityName(cityName);
 	}
     
@@ -49,18 +52,19 @@ public class StateCityServiceTest {
 	    HttpEntity<String> entity = new HttpEntity<String>("parameters", requestHeaders);
 		RestTemplate restTemplate=new RestTemplate();
 		restTemplate.setMessageConverters(getMessageConverters());
+		CityMaster cityMaterResp = null;
 		//restTemplate.g
 		String params=name;	
 		try{
 			response= restTemplate.exchange(url, HttpMethod.GET, entity, CityMaster.class,params);
-			CityMaster cityMaterResp=response.getBody();
+			cityMaterResp=response.getBody();
 //			System.out.println("Response"+cityMaterResp.toString());
 			System.out.println("Response:"+cityMaterResp.getCityName());
 			System.out.println("Response:"+cityMaterResp.getId());
 		}catch(RestClientException rce){
 			rce.printStackTrace();
 		}
-		return response;
+		return cityMaterResp;
 	}
 	
 	private static List<HttpMessageConverter<?>> getMessageConverters() {
