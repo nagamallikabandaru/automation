@@ -2,24 +2,23 @@ package com.helpchat.tests.testdata.entities;
 
 public class AddressApi {
 
-//	private String tcId;
-//	private String description;
-//	private String apiUrl;
-//	private String addressId;
 	
+//  "first_name",
+//  "last_name",
+//  "line1",
+//  "line2",
+//  "city",
+//  "state",
+//  "country",
+//  "zipcode",
+//  "contact_number",
+//  "default",
+//  "tag",
 	
-//    "first_name",
-//    "last_name",
-//    "line1",
-//    "line2",
-//    "city",
-//    "state",
-//    "country",
-//    "zipcode",
-//    "contact_number",
-//    "default",
-//    "tag",
-
+	private String tcId;
+	private String description;
+	private String apiUrl;
+	private String addressId;
 	private String line1;
 	private String line2;
 	private String first_name;
@@ -31,32 +30,32 @@ public class AddressApi {
 	private String contact_number;
 	private String _default;
 	private String tag;
-//	private String expectedResponse;
+	private String expectedResponse;
 	
-//	public String getTcId() {
-//		return tcId;
-//	}
-//	public void setTcId(String tcId) {
-//		this.tcId = tcId;
-//	}
-//	public String getDescription() {
-//		return description;
-//	}
-//	public void setDescription(String description) {
-//		this.description = description;
-//	}
-//	public String getApiUrl() {
-//		return apiUrl;
-//	}
-//	public void setApiUrl(String apiUrl) {
-//		this.apiUrl = apiUrl;
-//	}
-//	public String getAddressId() {
-//		return addressId;
-//	}
-//	public void setAddressId(String addressId) {
-//		this.addressId = addressId;
-//	}
+	public String getTcId() {
+		return tcId;
+	}
+	public void setTcId(String tcId) {
+		this.tcId = tcId;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getApiUrl() {
+		return apiUrl;
+	}
+	public void setApiUrl(String apiUrl) {
+		this.apiUrl = apiUrl;
+	}
+	public String getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(String addressId) {
+		this.addressId = addressId;
+	}
 	public String getLine1() {
 		return line1;
 	}
@@ -102,12 +101,12 @@ public class AddressApi {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
-//	public String getExpectedResponse() {
-//		return expectedResponse;
-//	}
-//	public void setExpectedResponse(String expectedResponse) {
-//		this.expectedResponse = expectedResponse;
-//	}
+	public String getExpectedResponse() {
+		return expectedResponse;
+	}
+	public void setExpectedResponse(String expectedResponse) {
+		this.expectedResponse = expectedResponse;
+	}
 	public String getFirst_name() {
 		return first_name;
 	}

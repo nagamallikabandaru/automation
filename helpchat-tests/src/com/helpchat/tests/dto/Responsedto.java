@@ -2,8 +2,8 @@ package com.helpchat.tests.dto;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 
+//@Component
 public class Responsedto implements Serializable{
 
   
@@ -11,13 +11,13 @@ public class Responsedto implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	//private List<TestDetailsdto> testDetailsdto;
+	
+	private String testID;
 	private String testName;
-  private String apiUrl;
-  private String testID;
-  private HashMap<String, String> result;
+	private String apiUrl;  
+	private HashMap<String, String> result;
   //private Resultdto resultDto;
-  private String exceptions;
+	private String exceptions;
   
 	public String getTestName() {
 		return testName;

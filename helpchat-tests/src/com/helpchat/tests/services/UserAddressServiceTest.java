@@ -3,6 +3,7 @@ package com.helpchat.tests.services;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -42,12 +43,6 @@ public class UserAddressServiceTest {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	  public void main(String args[]) throws Exception{
-	  
-		  getUserAddress(Long.valueOf(16182),Long.valueOf(3019));
-	  System.out.println("*****");
-	
-	}
 	
 	@Autowired
 	private UserAddressRepository userAddressRepository;
@@ -75,41 +70,50 @@ public class UserAddressServiceTest {
 		return mapToAddress(addressEntity);
 	}
     
-	public String postUserAddress(AddressApi consumerAddress){
+	public ResponseEntity<Address_> postUserAddress(Address_ consumerAddress) throws Exception{
+//		HashMap<String, ResponseEntity<Address_>>
+		ResponseEntity<Address_> postResponse = null;
+		HashMap<String,ResponseEntity<Address_>> responseMap=new HashMap<String, ResponseEntity<Address_>>();
 		try{
 		    HttpHeaders requestHeaders=new HttpHeaders();
 		    requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		    requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		    requestHeaders.add(X_HELPCHAT_AUTH,properties.getProperty(X_HELPCHAT_AUTH));		    		   
-		    HttpEntity<AddressApi> entity = new HttpEntity<AddressApi>(consumerAddress, requestHeaders);
+//		    HttpEntity<AddressApi> entity = new HttpEntity<Address_>(consumerAddress, requestHeaders);
+		    HttpEntity<Address_> entity = new HttpEntity<Address_>(consumerAddress, requestHeaders);
 		    
 			RestTemplate restTemplate=new RestTemplate();
 			restTemplate.setMessageConverters(getMessageConverters());
 		
 			String url=properties.getProperty("consumers.service.url")+"addresses";
-			System.out.println("URL:"+url);
-//			System.out.println("entity"+entity.getBody());
-//			System.out.println(consumerAddress.getContactNumber());
-//			logger.info("URL:"+url);
-			ResponseEntity<Address_> postResponse= restTemplate.exchange(url, HttpMethod.POST, entity, Address_.class);
-			System.out.println("Response from API:"+postResponse.getStatusCode());
-			System.out.println("Address_"+postResponse.getBody());
-//			ResponseEntity<String> postResponse=  restTemplate.execute(url,POST, entity, String.class);
-			if (postResponse.getStatusCode() == HttpStatus.OK) {
-				return "200";
+			logger.info("API Url to run:"+url);
+			postResponse= restTemplate.exchange(url, HttpMethod.POST, entity, Address_.class);
+			logger.info("Response from API:"+postResponse.getStatusCode());
+			logger.info("Address ID created"+postResponse.getBody().getId());
+//			responseMap.put(postResponse.getStatusCode().toString(), postResponse);
+			return postResponse;
+		/*	if (postResponse.getStatusCode() == HttpStatus.OK) {
+				return "200";				
 			} else if (postResponse.getStatusCode() == HttpStatus.UNAUTHORIZED) {
 				return "401";
 			} else if (postResponse.getStatusCode() == HttpStatus.BAD_REQUEST){
 				return "400";
-			}
+			}*/
 		}catch(RestClientException rce){
-			throw new RuntimeException("RestClientException", rce);
+			logger.error("RestClientException occured:"+rce.getMessage());
+			throw new Exception(rce.getMessage());
+//			responseMap.put(rce.getMessage(), postResponse);
+//			return responseMap;			
+//			throw new RuntimeException("RestClientException", rce);
 		}catch (Exception e){
-			throw new RuntimeException("Internal Server error",e);
-		}
-		return null;
-		
+			logger.error("Exception occured:"+e.getMessage());
+			throw new Exception(e.getMessage());
+//			responseMap.put(e.getMessage(), postResponse);
+//			return responseMap;
+		}		
 	}
+	
+	
 	
 	private static List<HttpMessageConverter<?>> getMessageConverters() {
 	    List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -149,7 +153,9 @@ public class UserAddressServiceTest {
 		consumerAddress.setLongitude(addressEntity.getLongitude());
 		return consumerAddress;
 		}catch(Exception e){
+//			return null;
 			throw new RuntimeException("error while mapping address",e);
+			
 		}
 	}
 	

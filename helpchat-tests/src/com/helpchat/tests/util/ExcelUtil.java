@@ -43,15 +43,22 @@ public class ExcelUtil {
 				HashMap<String, String> rowMap = new HashMap<String, String>();	
 				ArrayList<String> colValues = new ArrayList<String>();
 				row=sheet.getRow(rowCnt);
+//				logger.info("Row Cnt:"+row.getRowNum());
 				for(int colCnt=0;colCnt<row.getPhysicalNumberOfCells();colCnt++){
 					Cell cell=row.getCell(colCnt);
-//					logger.info("Cell value"+cell.getCellType());
-					if(colCnt==0){
-	                    colValues.add(cell.getStringCellValue());
-	                    rowKey=cell.getStringCellValue();
+//					logger.info("CellColumn value"+colCnt);
+//					logger.info(colHeaders.get(colCnt));
+					if(!cell.equals(null)){
+						if(colCnt==0){
+		                    colValues.add(cell.getStringCellValue());
+		                    rowKey=cell.getStringCellValue();
+						}else{
+							colValues.add(cell.getStringCellValue());						
+						}
 					}else{
-						colValues.add(cell.getStringCellValue());						
+						colValues.add("");
 					}
+						
 				
 				}
 				for (int j = 0; j < noOfCols; j++) {
