@@ -42,8 +42,7 @@ public class UserAddressServiceTest {
 	private static final String X_HELPCHAT_AUTH = "X-HELPCHAT-AUTH";
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	
+		
 	@Autowired
 	private UserAddressRepository userAddressRepository;
 	
@@ -70,17 +69,25 @@ public class UserAddressServiceTest {
 		return mapToAddress(addressEntity);
 	}
     
+//	@SuppressWarnings("unchecked")
+//	public <T> ResponseEntity<T> postUserAddress(Class<T> consumerAddress) throws Exception{
+
+//	String obj="Address_";
+//	
+//	Class c =Class.forName(obj); 
 	public ResponseEntity<Address_> postUserAddress(Address_ consumerAddress) throws Exception{
 //		HashMap<String, ResponseEntity<Address_>>
 		ResponseEntity<Address_> postResponse = null;
+//		ResponseEntity<T> postResponse = null;
 		HashMap<String,ResponseEntity<Address_>> responseMap=new HashMap<String, ResponseEntity<Address_>>();
 		try{
 		    HttpHeaders requestHeaders=new HttpHeaders();
 		    requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		    requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		    requestHeaders.add(X_HELPCHAT_AUTH,properties.getProperty(X_HELPCHAT_AUTH));		    		   
-//		    HttpEntity<AddressApi> entity = new HttpEntity<Address_>(consumerAddress, requestHeaders);
 		    HttpEntity<Address_> entity = new HttpEntity<Address_>(consumerAddress, requestHeaders);
+		   
+//		    HttpEntity<> entity = new HttpEntity<test>(consumerAddress, requestHeaders);
 		    
 			RestTemplate restTemplate=new RestTemplate();
 			restTemplate.setMessageConverters(getMessageConverters());
@@ -88,8 +95,9 @@ public class UserAddressServiceTest {
 			String url=properties.getProperty("consumers.service.url")+"addresses";
 			logger.info("API Url to run:"+url);
 			postResponse= restTemplate.exchange(url, HttpMethod.POST, entity, Address_.class);
+//			postResponse= (ResponseEntity<T>) restTemplate.exchange(url, HttpMethod.POST, entity, consumerAddress.getClass());
 			logger.info("Response from API:"+postResponse.getStatusCode());
-			logger.info("Address ID created"+postResponse.getBody().getId());
+//			logger.info("Address ID created"+postResponse.getBody().getId());
 //			responseMap.put(postResponse.getStatusCode().toString(), postResponse);
 			return postResponse;
 		/*	if (postResponse.getStatusCode() == HttpStatus.OK) {
@@ -126,7 +134,7 @@ public class UserAddressServiceTest {
 		try{
 		Address_ consumerAddress = new Address_();
 		String stateNameById = getStateNameById(addressEntity.getStateId());
-
+		System.out.println("*****************************"+addressEntity.getCityId());
 		JSONObject cityNameById = getCityInfoById(addressEntity.getCityId());
 		if(cityNameById!=null){
 			consumerAddress.setCity(cityNameById.getString("cityName"));
@@ -134,7 +142,7 @@ public class UserAddressServiceTest {
 				stateNameById = cityNameById.getJSONObject("state").getString("stateName");
 			}
 		}else{
-			consumerAddress.setCity(addressEntity.getCityAlias());
+			consumerAddress.setCity(null);
 		}
 		
 		consumerAddress.setState(stateNameById);
@@ -192,7 +200,8 @@ public class UserAddressServiceTest {
 	
 	private JSONObject getCityInfoById(Integer cityId) {
 		if (cityId == null) {
-			return null;
+			System.out.println("********************Returning null for cityId");
+			return null;		
 		}
 		try {
 			StringBuilder urlBuilder = new StringBuilder();

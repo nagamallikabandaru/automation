@@ -23,6 +23,7 @@ import com.helpchat.tests.services.UserAddressServiceTest;
 import com.helpchat.tests.util.ExcelUtil;
 import com.helpchat.tests.util.PropertiesUtil;
 import com.helpchat.tests.comparator.*;
+
 @RestController
 @RequestMapping("/")
 public class UserAddressControllerTest {
@@ -45,52 +46,69 @@ public class UserAddressControllerTest {
 		Resultdto resultDto = new Resultdto();
 		List<Responsedto> responseDtoList = new ArrayList<Responsedto>();
 //		HashMap<String,ResponseEntity<Address_>> responseMap=new HashMap<String, ResponseEntity<Address_>>();
-//		HashMap<String, String> result = new HashMap<String, String>();
 //		AddressApi addressApi=new AddressApi();
 		Address_ address_=new Address_();
+		Responsedto responseDtoPre = new Responsedto();
 		logger.info("In testPostAddress method");
 		logger.info("user id:"+properties.getProperty("user_id"));
 		Long userId=Long.valueOf(properties.getProperty("user_id"));
-		HashMap<String, HashMap<String, String>> dataMap = ExcelUtil.readXlsFile(properties.getProperty("testData"));
+		HashMap<String, HashMap<String, String>> dataMap;
 		
-		Iterator<String> iterData = dataMap.keySet().iterator();
+		ResponseEntity<Address_> response = null;
 	
-		while (iterData.hasNext()) {
-			Responsedto responseDto = new Responsedto();
-			String rowKey = iterData.next();
-			HashMap<String, String> rowMap = dataMap.get(rowKey);
-			responseDto.setTestID(rowMap.get("tcId"));
-			responseDto.setTestName(rowMap.get("description"));
-			responseDto.setApiUrl(rowMap.get("apiUrl"));
-			logger.info(responseDto.getTestID());
-			//responseDtoList.add(resposenFdto);
-//			responseDto.setExpectedResponse(rowMap.get("expectedResponse"));
-			Address_ addressJson = mapToAddressApiEntity(rowMap);
-			HashMap<String, String> result=new HashMap<String, String>();
-			ResponseEntity<Address_> response = null;
-			try {
+		try{
+			dataMap = ExcelUtil.readXlsFile(properties.getProperty("testData"));
+		}catch (Exception e) {				
+//			result.put("Status", "Fail");
+//			result.put("Message", "Exceptions occured");
+			responseDtoPre.setExceptions(e.getMessage());
+//			responseDto.setResult(result);
+			responseDtoList.add(responseDtoPre);
+			return new ResponseEntity<Object>(responseDtoPre,HttpStatus.PRECONDITION_FAILED);
+		}
+			Iterator<String> iterData = dataMap.keySet().iterator();
+		
+			while (iterData.hasNext()) {
+				
+				String rowKey = iterData.next();
+				HashMap<String, String> result=new HashMap<String, String>();
+				HashMap<String, String> rowMap = dataMap.get(rowKey);
+				Responsedto responseDto = new Responsedto();
+				responseDto.setTestID(rowMap.get("tcId"));
+				responseDto.setTestName(rowMap.get("description"));
+				responseDto.setApiUrl(rowMap.get("apiUrl"));
+				logger.debug("************************************");
+				logger.info(responseDto.getTestID());
+				logger.info(responseDto.getTestName());
+				logger.info(responseDto.getApiUrl());
+				//responseDtoList.add(resposenFdto);
+	//			responseDto.setExpectedResponse(rowMap.get("expectedResponse"));
+				Address_ addressJson = mapToAddressApiEntity(rowMap);
+				
+				
+				try {
 				response=userAddressServiceTest.postUserAddress(addressJson);
 				if (response.getStatusCode().toString().contentEquals(rowMap.get("expectedResponse"))) {
 					switch (response.getStatusCode().toString()) {
 					case "201":
 						
-//						System.out.println("Inside switch case");
+	//						System.out.println("Inside switch case");
 						address_=userAddressServiceTest.getUserAddress(userId, response.getBody().getId());
 						Address address=new Address();
-						HashMap<String, String> comparatorResult=  address.comparator(response.getBody(), address_);
+						HashMap<String, String> comparatorResult=  address.comparator(response.getBody(), address_,rowMap.get("fieldsToValidate"));
 						System.out.println("Validation result:"+comparatorResult.get("validation"));
 						if (comparatorResult.get("Validation").toLowerCase().contains("success")){
 							result.put("Status", "Pass");
 							result.put("Message", "api verfied successfully");
-
+	
 						}else{
 							result.put("Status", "Fail");
 							
-							String message="Data mismatch for:";
+							String message="";
 							for(String key:comparatorResult.keySet()){
 								String value=comparatorResult.get(key);
 								if(value.contains("mismatch")){
-									message=message+key+",";
+									message=message+key+":"+value+"||";
 								}
 								
 								result.put("Message", message);
@@ -99,21 +117,26 @@ public class UserAddressControllerTest {
 						responseDto.setResult(result);
 						responseDto.setExceptions("No exceptions occured");
 						responseDtoList.add(responseDto);
-//						return new ResponseEntity<Object>(responseDto,HttpStatus.OK);
-//					case 200:
-//						break;	
+	//						return new ResponseEntity<Object>(responseDto,HttpStatus.OK);
+	//					case 200:
+	//						break;	
 					}
+					
+					logger.info(responseDto.getResult().toString());
+					logger.info(responseDto.getExceptions());
 				} else{
 					result.put("Status", "Fail");
 					result.put("Message", " Unexpected response from api."
 							+ "Actual Response:"+response.getStatusCode().toString()
 							+ "Expected Response:"+rowMap.get("expectedResponse"));		
+					logger.info(result.toString()+" when expected result is different from actual response");
 					responseDto.setResult(result);
 					responseDto.setExceptions("No exceptions occured");
 					responseDtoList.add(responseDto);
-//					return new ResponseEntity<Object>(responseDto,HttpStatus.EXPECTATION_FAILED);
-				}			
-		} catch(NullPointerException npe){
+	//					return new ResponseEntity<Object>(responseDto,HttpStatus.EXPECTATION_FAILED);
+
+			}
+			}catch(NullPointerException npe){
 				result.put("Status", "Fail");
 				result.put("Message", " API Response is null"+response.getStatusCode());		
 				responseDto.setResult(result);
@@ -128,11 +151,10 @@ public class UserAddressControllerTest {
 				responseDto.setResult(result);
 				responseDtoList.add(responseDto);
 //				return new ResponseEntity<Object>(responseDto,HttpStatus.EXPECTATION_FAILED);
-			}						
+			}				
 		}
-		
-		resultDto.setResponseDto(responseDtoList);
-		return new ResponseEntity<Object>(resultDto,HttpStatus.OK);		
+			resultDto.setResponseDto(responseDtoList);
+			return new ResponseEntity<Object>(resultDto,HttpStatus.OK);			
 	}
 	
 	
