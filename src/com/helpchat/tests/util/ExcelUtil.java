@@ -43,11 +43,11 @@ public class ExcelUtil {
 				HashMap<String, String> rowMap = new HashMap<String, String>();	
 				ArrayList<String> colValues = new ArrayList<String>();
 				row=sheet.getRow(rowCnt);
-				logger.info("Row Cnt:"+row.getRowNum());
+//				logger.info("Row Cnt:"+row.getRowNum());
 				for(int colCnt=0;colCnt<row.getPhysicalNumberOfCells();colCnt++){
 					Cell cell=row.getCell(colCnt);
 //					logger.info("CellColumn value"+colCnt);
-					logger.info(colHeaders.get(colCnt));
+//					logger.info(colHeaders.get(colCnt));
 					if(!cell.equals(null)){
 						if(colCnt==0){
 		                    colValues.add(cell.getStringCellValue());

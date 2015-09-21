@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+
+
+//import org.codehaus.jackson.map.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectWriter;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.helpchat.consumers.model.Address_;
 import com.helpchat.tests.dto.Responsedto;
 import com.helpchat.tests.dto.Resultdto;
@@ -32,12 +40,13 @@ public class UserAddressControllerTest {
 //	ApplicationContext context;
 
 	@Autowired
-	UserAddressServiceTest userAddressServiceTest;
+	UserAddressServiceTest<Address_, Address_> userAddressServiceTest;
 	
 	@Autowired
 	private PropertiesUtil properties;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/test/v1/customers/me/addresses",method=RequestMethod.POST)
 	public  ResponseEntity<Object> testPostAddress(){
 		
@@ -55,6 +64,7 @@ public class UserAddressControllerTest {
 		HashMap<String, HashMap<String, String>> dataMap;
 		
 		ResponseEntity<Address_> response = null;
+//		UserAddressServiceTest<Address_, Address_> userAddressServiceTest=new UserAddressServiceTest<Address_, Address_>();
 	
 		try{
 			dataMap = ExcelUtil.readXlsFile(properties.getProperty("testData"));
@@ -85,43 +95,55 @@ public class UserAddressControllerTest {
 	//			responseDto.setExpectedResponse(rowMap.get("expectedResponse"));
 				Address_ addressJson = mapToAddressApiEntity(rowMap);
 				
-				
+//				String url=properties.getProperty("consumers.service.url")+"addresses";
 				try {
-				response=userAddressServiceTest.postUserAddress(addressJson);
-				if (response.getStatusCode().toString().contentEquals(rowMap.get("expectedResponse"))) {
-					switch (response.getStatusCode().toString()) {
-					case "201":
-						
-	//						System.out.println("Inside switch case");
-						address_=userAddressServiceTest.getUserAddress(userId, response.getBody().getId());
-						Address address=new Address();
-						HashMap<String, String> comparatorResult=  address.comparator(response.getBody(), address_,rowMap.get("fieldsToValidate"));
-						System.out.println("Validation result:"+comparatorResult.get("validation"));
-						if (comparatorResult.get("Validation").toLowerCase().contains("success")){
-							result.put("Status", "Pass");
-							result.put("Message", "api verfied successfully");
-	
-						}else{
-							result.put("Status", "Fail");
-							
-							String message="";
-							for(String key:comparatorResult.keySet()){
-								String value=comparatorResult.get(key);
-								if(value.contains("mismatch")){
-									message=message+key+":"+value+"||";
-								}
+					logger.info("Calling postUserAddress method:");
+					response=userAddressServiceTest.postUserAddress(addressJson);
+					ObjectMapper mapper = new ObjectMapper();
+					if (response.getStatusCode().toString().contentEquals(rowMap.get("expectedResponse"))) {
+						switch (response.getStatusCode().toString()) {
+						case "201":
+//							logger.info("Response Body:"+response.getBody().getClass().getName());
+							ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+							String json = ow.writeValueAsString(response.getBody());
+//							JSONObject jsonObject=new JSONObject(json);
+							logger.info("Json string"+json);
+							logger.info("Json string"+new JSONObject(json).toString());
+						   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+							Address_ resp=mapper.readValue(new JSONObject(json).toString(), Address_.class);
+							logger.info("resp"+resp);
+							logger.info("Calling getUserAddress method:"+resp.getCity());
+							address_=userAddressServiceTest.getUserAddress(userId, resp.getId());
+							logger.info("address_ from DB:"+address_.getCity());
+							Address address=new Address();
+							logger.info("API response is 201. Validating the data");
+							HashMap<String, String> comparatorResult=  address.comparator(resp, address_,rowMap.get("fieldsToValidate"));
+							System.out.println("Validation result:"+comparatorResult.get("validation"));
+							if (comparatorResult.get("Validation").toLowerCase().contains("success")){
+								result.put("Status", "Pass");
+								result.put("Message", "api verfied successfully");
+		
+							}else{
+								result.put("Status", "Fail");
 								
-								result.put("Message", message);
+								String message="";
+								for(String key:comparatorResult.keySet()){
+									String value=comparatorResult.get(key);
+									if(value.contains("mismatch")){
+										message=message+key+":"+value+"||";
+									}
+									
+									result.put("Message", message);
+								}
 							}
+							responseDto.setResult(result);
+							responseDto.setExceptions("No exceptions occured");
+							responseDtoList.add(responseDto);
+		//						return new ResponseEntity<Object>(responseDto,HttpStatus.OK);
+		//					case 200:
+		//						break;	
 						}
-						responseDto.setResult(result);
-						responseDto.setExceptions("No exceptions occured");
-						responseDtoList.add(responseDto);
-	//						return new ResponseEntity<Object>(responseDto,HttpStatus.OK);
-	//					case 200:
-	//						break;	
-					}
-					
+						
 					logger.info(responseDto.getResult().toString());
 					logger.info(responseDto.getExceptions());
 				} else{
@@ -142,12 +164,13 @@ public class UserAddressControllerTest {
 				responseDto.setResult(result);
 				responseDto.setExceptions(npe.getMessage());
 				responseDtoList.add(responseDto);
+				npe.printStackTrace();
 //				return new ResponseEntity<Object>(responseDto,HttpStatus.EXPECTATION_FAILED);				
 			}catch (Exception e) {				
 				result.put("Status", "Fail");
 				result.put("Message", "Exceptions occured");
 				responseDto.setExceptions(e.getMessage());
-//				e.printStackTrace();
+				e.printStackTrace();
 				responseDto.setResult(result);
 				responseDtoList.add(responseDto);
 //				return new ResponseEntity<Object>(responseDto,HttpStatus.EXPECTATION_FAILED);

@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.ParseException;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -33,11 +32,10 @@ import org.springframework.web.client.RestTemplate;
 import com.helpchat.consumers.model.Address_;
 import com.helpchat.tests.chat.dao.UserAddressRepository;
 import com.helpchat.tests.entities.UserAddress;
-import com.helpchat.tests.testdata.entities.AddressApi;
 import com.helpchat.tests.util.PropertiesUtil;
 
 @Service
-public class UserAddressServiceTest {
+public class UserAddressServiceTest <U,V>{
 
 	private static final String X_HELPCHAT_AUTH = "X-HELPCHAT-AUTH";
 
@@ -52,6 +50,35 @@ public class UserAddressServiceTest {
 	
 //	@Autowired
 //	private AddressApi addressApi;
+	
+	
+	@SuppressWarnings("unchecked")
+	public ResponseEntity<V> postUserAddress(U payLoad) throws Exception{
+//		ResponseEntity<Address_> postResponse = null;
+		ResponseEntity<V> postResponse = null;
+		try{
+		    HttpHeaders requestHeaders=new HttpHeaders();
+		    requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		    requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+		    requestHeaders.add(X_HELPCHAT_AUTH,properties.getProperty(X_HELPCHAT_AUTH));		    		   
+		    HttpEntity<U> entity = new HttpEntity<U>(payLoad, requestHeaders);
+		      
+			RestTemplate restTemplate=new RestTemplate();
+			restTemplate.setMessageConverters(getMessageConverters());
+			String url=properties.getProperty("consumers.service.url")+"addresses";
+//			postResponse= restTemplate.exchange(url, HttpMethod.POST, entity, Address_.class);
+			postResponse= (ResponseEntity<V>) restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+			return postResponse;
+
+		}catch(RestClientException rce){
+			logger.error("RestClientException occured:"+rce.getMessage());
+			throw new Exception(rce.getMessage());
+		}catch (Exception e){
+			logger.error("Exception occured:"+e.getMessage());
+			throw new Exception(e.getMessage());
+		}		
+	}
+	
 	
 	public  Address_ getUserAddress(Long userId,Long addressId) throws Exception {
 		//CityRepositoryTest cityRepositoryTest= context.getBean(CityRepositoryTest.class);
@@ -68,59 +95,6 @@ public class UserAddressServiceTest {
 		}
 		return mapToAddress(addressEntity);
 	}
-    
-//	@SuppressWarnings("unchecked")
-//	public <T> ResponseEntity<T> postUserAddress(Class<T> consumerAddress) throws Exception{
-
-//	String obj="Address_";
-//	
-//	Class c =Class.forName(obj); 
-	public ResponseEntity<Address_> postUserAddress(Address_ consumerAddress) throws Exception{
-//		HashMap<String, ResponseEntity<Address_>>
-		ResponseEntity<Address_> postResponse = null;
-//		ResponseEntity<T> postResponse = null;
-		HashMap<String,ResponseEntity<Address_>> responseMap=new HashMap<String, ResponseEntity<Address_>>();
-		try{
-		    HttpHeaders requestHeaders=new HttpHeaders();
-		    requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		    requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		    requestHeaders.add(X_HELPCHAT_AUTH,properties.getProperty(X_HELPCHAT_AUTH));		    		   
-		    HttpEntity<Address_> entity = new HttpEntity<Address_>(consumerAddress, requestHeaders);
-		   
-//		    HttpEntity<> entity = new HttpEntity<test>(consumerAddress, requestHeaders);
-		    
-			RestTemplate restTemplate=new RestTemplate();
-			restTemplate.setMessageConverters(getMessageConverters());
-		
-			String url=properties.getProperty("consumers.service.url")+"addresses";
-			logger.info("API Url to run:"+url);
-			postResponse= restTemplate.exchange(url, HttpMethod.POST, entity, Address_.class);
-//			postResponse= (ResponseEntity<T>) restTemplate.exchange(url, HttpMethod.POST, entity, consumerAddress.getClass());
-			logger.info("Response from API:"+postResponse.getStatusCode());
-//			logger.info("Address ID created"+postResponse.getBody().getId());
-//			responseMap.put(postResponse.getStatusCode().toString(), postResponse);
-			return postResponse;
-		/*	if (postResponse.getStatusCode() == HttpStatus.OK) {
-				return "200";				
-			} else if (postResponse.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-				return "401";
-			} else if (postResponse.getStatusCode() == HttpStatus.BAD_REQUEST){
-				return "400";
-			}*/
-		}catch(RestClientException rce){
-			logger.error("RestClientException occured:"+rce.getMessage());
-			throw new Exception(rce.getMessage());
-//			responseMap.put(rce.getMessage(), postResponse);
-//			return responseMap;			
-//			throw new RuntimeException("RestClientException", rce);
-		}catch (Exception e){
-			logger.error("Exception occured:"+e.getMessage());
-			throw new Exception(e.getMessage());
-//			responseMap.put(e.getMessage(), postResponse);
-//			return responseMap;
-		}		
-	}
-	
 	
 	
 	private static List<HttpMessageConverter<?>> getMessageConverters() {

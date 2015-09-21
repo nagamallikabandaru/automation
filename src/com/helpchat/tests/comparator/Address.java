@@ -6,6 +6,7 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 
 import com.helpchat.consumers.model.Address_;
+//import com.jcraft.jsch.Logger;
 
 public class Address {
 
@@ -16,18 +17,17 @@ public class Address {
 			int cnt = 0;
 						
 			BeanMap map = new BeanMap(addressJsonFromAPI);
-	
+			System.out.println("In comparator..");
 	        PropertyUtilsBean propUtils = new PropertyUtilsBean();
 //	        propUtils.getNestedProperty(addressJsonFromAPI, name)
 	       
 	        for (Object propNameObject : map.keySet()) {
 	            String propertyName = (String) propNameObject;
-	            System.out.println("Property Namme:"+propertyName);
 	            if(!(propertyName.equals("class")|| propertyName.equals("additionalProperties"))){
 		            Object dbProperty = propUtils.getProperty(addressJsonFromDB, propertyName);
 		            Object apiProperty = propUtils.getProperty(addressJsonFromAPI, propertyName);
-		            System.out.println("property1:"+dbProperty);
-		            System.out.println("property2:"+apiProperty);
+//		            System.out.println("property1:"+dbProperty);
+//		            System.out.println("property2:"+apiProperty);
 		            if(null!=apiProperty && null!=dbProperty){
 		            	if(apiProperty.equals(dbProperty)){
 		            		cnt++;
