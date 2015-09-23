@@ -12,7 +12,15 @@
      	<log4j2.version>2.3</log4j2.version>
       
    </properties>
-   <repositories>
+   	<repositories>
+		<repository>
+			<id>public</id>
+			<name>public</name>
+			<url>http://nexus01.helpchat.in:8090/nexus/content/groups/public</url>
+		</repository>
+
+	</repositories>
+   <!-- <repositories>
       <repository>
          <id>akosha-internal</id>
          <name>akosha internal repo</name>
@@ -35,7 +43,7 @@
             <enabled>true</enabled>
          </snapshots>
       </repository>
-   </repositories>
+   </repositories> -->
    <dependencies>
       <!-- Database Dependency -->
       <dependency>
