@@ -4,7 +4,9 @@
    <groupId>helpchat-tests</groupId>
    <artifactId>helpchat-tests</artifactId>
    <version>0.0.1-SNAPSHOT</version>
+   <name>helpchat-tests</name>
    <packaging>war</packaging>
+   
    <properties>
       <org.springframework-version>4.2.0.RELEASE</org.springframework-version>
       <org.hibernate-version>5.0.0.Final</org.hibernate-version>
