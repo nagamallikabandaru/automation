@@ -8,6 +8,10 @@ import java.util.List;
 
 
 
+
+
+
+
 //import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
 import org.json.JSONObject;
@@ -24,15 +28,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.helpchat.consumers.model.Address_;
-import com.helpchat.tests.dto.Responsedto;
-import com.helpchat.tests.dto.Resultdto;
+import com.helpchat.tests.dto.*;
 import com.helpchat.tests.services.UserAddressServiceTest;
-//import com.helpchat.tests.testdata.entities.AddressApi;
 import com.helpchat.tests.util.ExcelUtil;
 import com.helpchat.tests.util.PropertiesUtil;
 import com.helpchat.tests.comparator.*;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @RestController
+@Api(value = "address", description = "Operations to test the address APIs")
 @RequestMapping("/")
 public class UserAddressControllerTest {
 
@@ -46,6 +51,7 @@ public class UserAddressControllerTest {
 	private PropertiesUtil properties;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	@ApiOperation(value = "Test for post address api")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/test/v1/customers/me/addresses",method=RequestMethod.POST)
 	public  ResponseEntity<Object> testPostAddress(){
@@ -79,8 +85,7 @@ public class UserAddressControllerTest {
 			Iterator<String> iterData = dataMap.keySet().iterator();
 		
 			while (iterData.hasNext()) {
-				
-				String rowKey = iterData.next();
+  				String rowKey = iterData.next();
 				HashMap<String, String> result=new HashMap<String, String>();
 				HashMap<String, String> rowMap = dataMap.get(rowKey);
 				Responsedto responseDto = new Responsedto();
@@ -109,7 +114,7 @@ public class UserAddressControllerTest {
 //							JSONObject jsonObject=new JSONObject(json);
 							logger.info("Json string"+json);
 							logger.info("Json string"+new JSONObject(json).toString());
-						   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+							mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 							Address_ resp=mapper.readValue(new JSONObject(json).toString(), Address_.class);
 							logger.info("resp"+resp);
 							logger.info("Calling getUserAddress method:"+resp.getCity());

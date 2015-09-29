@@ -47,7 +47,6 @@ public class UserAddressServiceTest <U,V>{
 	@Autowired
 	private PropertiesUtil properties;
 	
-	
 //	@Autowired
 //	private AddressApi addressApi;
 	

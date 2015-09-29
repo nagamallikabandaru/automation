@@ -1,5 +1,6 @@
 package com.helpchat.tests.controller;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -9,8 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.helpchat.consumers.model.Address_;
 import com.helpchat.tests.dto.Responsedto;
 import com.helpchat.tests.entities.CityMaster;
+import com.helpchat.tests.services.RequestGeneratorService;
 import com.helpchat.tests.services.StateCityServiceTest;
 
 import java.util.HashMap;
@@ -22,10 +28,42 @@ import java.util.logging.Logger;
 public class CityDataControllerTest {
 	
 	@Autowired
-//	StateCityServiceTest stateCityServiceTest;
+	RequestGeneratorService<CityMaster, CityMaster> cityMasterServiceTest;
 	ApplicationContext context;
 	private static final Logger logger=Logger.getLogger(CityDataControllerTest.class.getName());
 
+	@RequestMapping(value="test/city/pincode/{id}",method=RequestMethod.POST)
+
+	public void getCityByPincodeTest(@PathVariable String id){
+		try{
+//			StateCityServiceTest stateCityServiceTest=context.getBean(StateCityServiceTest.class);
+			HashMap<String, String> params=new HashMap<String, String>();
+			params.put("id", id);
+			ResponseEntity<CityMaster> response= cityMasterServiceTest.get(params);
+			
+			if(response!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+				String json = ow.writeValueAsString(response.getBody());
+				logger.info("Json string"+json);
+				logger.info("Json string"+new JSONObject(json).toString());
+				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				CityMaster resp=mapper.readValue(new JSONObject(json).toString(), CityMaster.class);
+				logger.info("resp"+resp);
+				logger.info("City ID:"+resp.getCityName());
+				logger.info(resp.getId().toString());
+//				logger.info(resp.getPriorityDisplay().toString());
+				logger.info(resp.getState().getStateName().toString());
+				logger.info("State ID:"+resp.getState().getId());
+			}
+		}
+		catch(Exception e){
+			logger.log(Level.SEVERE,e.getMessage());
+			e.printStackTrace();
+			//return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 	
 	
 	@RequestMapping(value="test/city/name/{name}",method=RequestMethod.GET)
