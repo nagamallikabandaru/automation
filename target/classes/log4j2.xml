@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Properties>
+		<Property name="log-path">/opt/akoshalogs</Property>
+		<Property name="log-level">info</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss} app:consumer-api %-5level userid:%X{userid} %logger{36}:%L - %msg%n" />
+		</Console>
+		<RollingFile name="app-log" fileName="${log-path}/consumer-api.log"
+			filePattern="${log-path}/consumer-api-%d{yyyy-MM-dd}.log.gz" immediateFlush="true">
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss} app:consumer-api [%t] %-5level userid:%X{userid} %logger{36}:%L - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="${log-level}">
+			<AppenderRef ref="Console" /> 
+			<AppenderRef ref="app-log" />
+		</Root>
+	</Loggers>
+</Configuration>
