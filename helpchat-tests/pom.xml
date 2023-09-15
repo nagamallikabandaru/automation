@@ -8,7 +8,7 @@
    <properties>
       <org.springframework-version>4.2.0.RELEASE</org.springframework-version>
       <org.hibernate-version>5.0.0.Final</org.hibernate-version>
-      <jackson.databind-version>2.6.1</jackson.databind-version>
+      <jackson.databind-version>2.12.7.1</jackson.databind-version>
      	<log4j2.version>2.3</log4j2.version>
       
    </properties>
